@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ShoppingCart, Heart, Star, Search, ChevronRight, Zap, Truck, Shield, Clock } from 'lucide-react';
+import { useLocation } from 'wouter';
+import Toast, { ToastMessage, ToastType } from '@/components/Toast';
 
 interface Product {
   id: number;
@@ -117,16 +119,13 @@ const products: Product[] = [
 const categories = ['Todos', 'Smartphones', 'Notebooks', 'Áudio', 'Games', 'Wearables', 'Câmeras', 'Acessórios'];
 
 export default function Home() {
+  const [, setLocation] = useLocation();
   const [cart, setCart] = useState<(Product & { qty: number })[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('Todos');
   const [sortBy, setSortBy] = useState('default');
   const [isCartOpen, setIsCartOpen] = useState(false);
-  const [animatingProducts, setAnimatingProducts] = useState<number[]>([]);
-
-  useEffect(() => {
-    setAnimatingProducts(filteredProducts.map((_, i) => i));
-  }, [selectedCategory, searchTerm, sortBy]);
+  const [toasts, setToasts] = useState<ToastMessage[]>([]);
 
   const filteredProducts = products
     .filter(p => {
@@ -142,25 +141,40 @@ export default function Home() {
       return 0;
     });
 
+  const addToast = (message: string, type: ToastType = 'success', duration = 4000) => {
+    const id = Math.random().toString(36).substr(2, 9);
+    setToasts(prev => [...prev, { id, message, type, duration }]);
+  };
+
+  const removeToast = (id: string) => {
+    setToasts(prev => prev.filter(t => t.id !== id));
+  };
+
   const addToCart = (product: Product) => {
     setCart(prev => {
       const existing = prev.find(item => item.id === product.id);
       if (existing) {
+        addToast(`${product.name} - Quantidade aumentada para ${existing.qty + 1}`, 'info');
         return prev.map(item =>
           item.id === product.id ? { ...item, qty: item.qty + 1 } : item
         );
       }
+      addToast(`✓ ${product.name} adicionado ao carrinho!`, 'success');
       return [...prev, { ...product, qty: 1 }];
     });
   };
 
-  const removeFromCart = (productId: number) => {
+  const removeFromCart = (productId: number, productName: string) => {
     setCart(prev => prev.filter(item => item.id !== productId));
+    addToast(`${productName} removido do carrinho`, 'info');
   };
 
   const updateQty = (productId: number, qty: number) => {
     if (qty <= 0) {
-      removeFromCart(productId);
+      const product = cart.find(item => item.id === productId);
+      if (product) {
+        removeFromCart(productId, product.name);
+      }
     } else {
       setCart(prev =>
         prev.map(item => item.id === productId ? { ...item, qty } : item)
@@ -170,6 +184,14 @@ export default function Home() {
 
   const cartTotal = cart.reduce((sum, item) => sum + item.price * item.qty, 0);
   const cartCount = cart.reduce((sum, item) => sum + item.qty, 0);
+
+  const handleCheckout = () => {
+    if (cart.length === 0) {
+      addToast('Adicione produtos ao carrinho antes de continuar', 'warning');
+      return;
+    }
+    setLocation('/checkout');
+  };
 
   const renderStars = (rating: number) => {
     const filled = Math.floor(rating);
@@ -202,6 +224,9 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-white overflow-hidden">
+      {/* Toast Notifications */}
+      <Toast toasts={toasts} onRemove={removeToast} />
+
       {/* Header */}
       <header className="sticky top-0 z-50 bg-white border-b border-gray-200 shadow-sm animate-fade-in-down">
         <div className="container mx-auto px-4 py-4">
@@ -477,7 +502,7 @@ export default function Home() {
                             +
                           </button>
                           <button
-                            onClick={() => removeFromCart(item.id)}
+                            onClick={() => removeFromCart(item.id, item.name)}
                             className="ml-auto text-gray-400 hover:text-red-500 text-sm transition-smooth hover-scale"
                           >
                             🗑
@@ -507,8 +532,12 @@ export default function Home() {
                     <span className="animate-glow-pulse">R$ {cartTotal.toLocaleString('pt-BR')}</span>
                   </div>
                 </div>
-                <Button className="w-full bg-blue-700 hover:bg-blue-800 text-white font-semibold py-3 transition-smooth hover-lift animate-fade-in-up" style={{ animationDelay: '300ms' }}>
-                  Finalizar compra
+                <Button
+                  onClick={handleCheckout}
+                  className="w-full bg-blue-700 hover:bg-blue-800 text-white font-semibold py-3 transition-smooth hover-lift animate-fade-in-up"
+                  style={{ animationDelay: '300ms' }}
+                >
+                  Ir para Checkout
                 </Button>
               </div>
             )}
