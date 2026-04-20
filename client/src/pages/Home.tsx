@@ -7,116 +7,7 @@ import Toast, { ToastMessage, ToastType } from '@/components/Toast';
 import { useCart } from '@/hooks/useCart';
 import { useWishlist } from '@/hooks/useWishlist';
 
-interface Product {
-  id: number;
-  name: string;
-  seller: string;
-  price: number;
-  oldPrice?: number;
-  rating: number;
-  reviews: number;
-  badge?: 'sale' | 'new' | 'hot';
-  image: string;
-  category: string;
-}
-
-const products: Product[] = [
-  {
-    id: 1,
-    name: 'iPhone 15 128GB',
-    seller: 'Apple Premium',
-    price: 4299,
-    oldPrice: 4799,
-    rating: 4.9,
-    reviews: 1243,
-    badge: 'sale',
-    image: 'https://d2xsxph8kpxj0f.cloudfront.net/310519663241647868/49kbt9P7NUQXiQVoNv2xMb/featured-smartphone-Lr8s8DkaVPFjFmzj76PoZ8.webp',
-    category: 'Smartphones',
-  },
-  {
-    id: 2,
-    name: 'Samsung Galaxy S24',
-    seller: 'Samsung Store',
-    price: 3799,
-    oldPrice: 4299,
-    rating: 4.8,
-    reviews: 876,
-    badge: 'sale',
-    image: 'https://d2xsxph8kpxj0f.cloudfront.net/310519663241647868/49kbt9P7NUQXiQVoNv2xMb/featured-smartphone-Lr8s8DkaVPFjFmzj76PoZ8.webp',
-    category: 'Smartphones',
-  },
-  {
-    id: 3,
-    name: 'Xiaomi Redmi Note 13',
-    seller: 'MiStore',
-    price: 1299,
-    rating: 4.5,
-    reviews: 412,
-    badge: 'new',
-    image: 'https://d2xsxph8kpxj0f.cloudfront.net/310519663241647868/49kbt9P7NUQXiQVoNv2xMb/featured-smartphone-Lr8s8DkaVPFjFmzj76PoZ8.webp',
-    category: 'Smartphones',
-  },
-  {
-    id: 4,
-    name: 'MacBook Air M2 256GB',
-    seller: 'Apple Premium',
-    price: 8499,
-    oldPrice: 9299,
-    rating: 5.0,
-    reviews: 2103,
-    badge: 'hot',
-    image: 'https://d2xsxph8kpxj0f.cloudfront.net/310519663241647868/49kbt9P7NUQXiQVoNv2xMb/laptop-workspace-KCB92K8TjCwxh22GUKyPpm.webp',
-    category: 'Notebooks',
-  },
-  {
-    id: 5,
-    name: 'Notebook Dell Inspiron i5',
-    seller: 'Dell Oficial',
-    price: 3199,
-    oldPrice: 3799,
-    rating: 4.7,
-    reviews: 534,
-    badge: 'sale',
-    image: 'https://d2xsxph8kpxj0f.cloudfront.net/310519663241647868/49kbt9P7NUQXiQVoNv2xMb/laptop-workspace-KCB92K8TjCwxh22GUKyPpm.webp',
-    category: 'Notebooks',
-  },
-  {
-    id: 6,
-    name: 'AirPods Pro 2ª Geração',
-    seller: 'Apple Premium',
-    price: 1799,
-    oldPrice: 1999,
-    rating: 4.9,
-    reviews: 3210,
-    badge: 'sale',
-    image: 'https://d2xsxph8kpxj0f.cloudfront.net/310519663241647868/49kbt9P7NUQXiQVoNv2xMb/tech-accessories-Dv3YnwVSwuHDreg9tc9rAp.webp',
-    category: 'Áudio',
-  },
-  {
-    id: 7,
-    name: 'Apple Watch Series 9',
-    seller: 'Apple Premium',
-    price: 3199,
-    oldPrice: 3599,
-    rating: 4.8,
-    reviews: 1102,
-    badge: 'sale',
-    image: 'https://d2xsxph8kpxj0f.cloudfront.net/310519663241647868/49kbt9P7NUQXiQVoNv2xMb/tech-accessories-Dv3YnwVSwuHDreg9tc9rAp.webp',
-    category: 'Wearables',
-  },
-  {
-    id: 8,
-    name: 'PS5 + 2 Controles',
-    seller: 'GameZone',
-    price: 4299,
-    oldPrice: 4799,
-    rating: 4.9,
-    reviews: 2341,
-    badge: 'hot',
-    image: 'https://d2xsxph8kpxj0f.cloudfront.net/310519663241647868/49kbt9P7NUQXiQVoNv2xMb/tech-accessories-Dv3YnwVSwuHDreg9tc9rAp.webp',
-    category: 'Games',
-  },
-];
+import { products, type Product } from '@/data/products';
 
 const categories = ['Todos', 'Smartphones', 'Notebooks', 'Áudio', 'Games', 'Wearables', 'Câmeras', 'Acessórios'];
 
@@ -258,19 +149,30 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Cart Button */}
-            <button
-              onClick={() => setIsCartOpen(!isCartOpen)}
-              className="relative flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-700 text-white hover:bg-blue-800 transition-smooth hover-lift animate-fade-in-right"
-              style={{ animationDelay: '200ms' }}
-            >
-              <ShoppingCart size={20} className="animate-bounce-in" />
-              {cartCount > 0 && (
-                <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center animate-pulse-glow animate-scale-in">
-                  {cartCount}
-                </span>
-              )}
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setLocation('/desejos')}
+                className="flex items-center justify-center w-10 h-10 rounded-lg border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 transition-smooth"
+                aria-label="Abrir lista de desejos"
+              >
+                <Heart size={18} />
+              </button>
+
+              {/* Cart Button */}
+              <button
+                onClick={() => setIsCartOpen(!isCartOpen)}
+                className="relative flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-700 text-white hover:bg-blue-800 transition-smooth hover-lift animate-fade-in-right"
+                style={{ animationDelay: '200ms' }}
+                aria-label="Abrir carrinho"
+              >
+                <ShoppingCart size={20} className="animate-bounce-in" />
+                {cartCount > 0 && (
+                  <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center animate-pulse-glow animate-scale-in">
+                    {cartCount}
+                  </span>
+                )}
+              </button>
+            </div>
           </div>
         </div>
       </header>
@@ -389,7 +291,7 @@ export default function Home() {
                     src={product.image}
                     alt={product.name}
                     className="w-full h-full object-cover group-hover:scale-110 transition-smooth duration-500 cursor-pointer"
-                    onClick={() => setLocation(`/product?id=${product.id}`)}
+                    onClick={() => setLocation(`/produto/${product.id}`)}
                   />
                   {product.badge && (
                     <div
@@ -424,7 +326,7 @@ export default function Home() {
                   <p className="text-xs text-gray-500 mb-2 animate-fade-in-up" style={{ animationDelay: `${idx * 80 + 1600}ms` }}>{product.seller}</p>
                   <h3
                     className="font-semibold text-gray-900 mb-2 line-clamp-2 text-sm animate-fade-in-up cursor-pointer hover:text-blue-700 transition-smooth"
-                    onClick={() => setLocation(`/product?id=${product.id}`)}
+                    onClick={() => setLocation(`/produto/${product.id}`)}
                     style={{ animationDelay: `${idx * 80 + 1700}ms` }}
                   >
                     {product.name}
@@ -511,7 +413,7 @@ export default function Home() {
                         className="w-16 h-16 object-cover rounded bg-gray-100 hover-scale transition-smooth cursor-pointer"
                         onClick={() => {
                           setIsCartOpen(false);
-                          setLocation(`/product?id=${item.id}`);
+                          setLocation(`/produto/${item.id}`);
                         }}
                       />
                       <div className="flex-1">
