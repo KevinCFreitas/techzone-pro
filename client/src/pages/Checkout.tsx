@@ -3,17 +3,13 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ChevronLeft, CheckCircle, Lock, CreditCard, Smartphone } from 'lucide-react';
 import { useLocation } from 'wouter';
+import { useCart } from '@/hooks/useCart';
 
-interface CartItem {
-  id: number;
-  name: string;
-  price: number;
-  qty: number;
-  image: string;
+interface FormErrors {
+  [key: string]: string;
 }
 
 interface CheckoutData {
-  // Endereço
   fullName: string;
   email: string;
   phone: string;
@@ -23,7 +19,6 @@ interface CheckoutData {
   city: string;
   state: string;
   zipCode: string;
-  // Pagamento
   paymentMethod: 'pix' | 'credit' | 'boleto';
   cardName: string;
   cardNumber: string;
@@ -31,26 +26,12 @@ interface CheckoutData {
   cardCvv: string;
 }
 
-interface FormErrors {
-  [key: string]: string;
-}
-
 export default function Checkout() {
   const [, setLocation] = useLocation();
+  const { cart: cartItems, clearCart } = useCart();
   const [step, setStep] = useState<'shipping' | 'payment' | 'confirmation'>('shipping');
   const [isProcessing, setIsProcessing] = useState(false);
   const [errors, setErrors] = useState<FormErrors>({});
-
-  // Dados do carrinho (em produção, viria do context/estado global)
-  const cartItems: CartItem[] = [
-    {
-      id: 1,
-      name: 'iPhone 15 128GB',
-      price: 4299,
-      qty: 1,
-      image: 'https://d2xsxph8kpxj0f.cloudfront.net/310519663241647868/49kbt9P7NUQXiQVoNv2xMb/featured-smartphone-Lr8s8DkaVPFjFmzj76PoZ8.webp',
-    },
-  ];
 
   const [formData, setFormData] = useState<CheckoutData>({
     fullName: '',
@@ -117,9 +98,9 @@ export default function Checkout() {
   const handlePaymentSubmit = async () => {
     if (validatePayment()) {
       setIsProcessing(true);
-      // Simula processamento de pagamento
       await new Promise(resolve => setTimeout(resolve, 2000));
       setIsProcessing(false);
+      clearCart();
       setStep('confirmation');
     }
   };
@@ -127,6 +108,20 @@ export default function Checkout() {
   const handleBackToHome = () => {
     setLocation('/');
   };
+
+  // Redireciona para home se o carrinho estiver vazio
+  if (cartItems.length === 0 && step !== 'confirmation') {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-gray-600 mb-4">Seu carrinho está vazio</p>
+          <Button onClick={handleBackToHome} className="bg-blue-700 hover:bg-blue-800">
+            Voltar para a loja
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">

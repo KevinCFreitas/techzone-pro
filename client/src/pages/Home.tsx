@@ -1,9 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ShoppingCart, Heart, Star, Search, ChevronRight, Zap, Truck, Shield, Clock } from 'lucide-react';
 import { useLocation } from 'wouter';
 import Toast, { ToastMessage, ToastType } from '@/components/Toast';
+import { useCart } from '@/hooks/useCart';
 
 interface Product {
   id: number;
@@ -120,7 +121,7 @@ const categories = ['Todos', 'Smartphones', 'Notebooks', 'Áudio', 'Games', 'Wea
 
 export default function Home() {
   const [, setLocation] = useLocation();
-  const [cart, setCart] = useState<(Product & { qty: number })[]>([]);
+  const { cart, addToCart, removeFromCart, updateQty, cartTotal, cartCount, isLoaded } = useCart();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('Todos');
   const [sortBy, setSortBy] = useState('default');
@@ -150,40 +151,20 @@ export default function Home() {
     setToasts(prev => prev.filter(t => t.id !== id));
   };
 
-  const addToCart = (product: Product) => {
-    setCart(prev => {
-      const existing = prev.find(item => item.id === product.id);
-      if (existing) {
-        addToast(`${product.name} - Quantidade aumentada para ${existing.qty + 1}`, 'info');
-        return prev.map(item =>
-          item.id === product.id ? { ...item, qty: item.qty + 1 } : item
-        );
-      }
-      addToast(`✓ ${product.name} adicionado ao carrinho!`, 'success');
-      return [...prev, { ...product, qty: 1 }];
-    });
-  };
-
-  const removeFromCart = (productId: number, productName: string) => {
-    setCart(prev => prev.filter(item => item.id !== productId));
-    addToast(`${productName} removido do carrinho`, 'info');
-  };
-
-  const updateQty = (productId: number, qty: number) => {
-    if (qty <= 0) {
-      const product = cart.find(item => item.id === productId);
-      if (product) {
-        removeFromCart(productId, product.name);
-      }
+  const handleAddToCart = (product: Product) => {
+    const existing = cart.find(item => item.id === product.id);
+    addToCart(product);
+    if (existing) {
+      addToast(`${product.name} - Quantidade aumentada para ${existing.qty + 1}`, 'info');
     } else {
-      setCart(prev =>
-        prev.map(item => item.id === productId ? { ...item, qty } : item)
-      );
+      addToast(`✓ ${product.name} adicionado ao carrinho!`, 'success');
     }
   };
 
-  const cartTotal = cart.reduce((sum, item) => sum + item.price * item.qty, 0);
-  const cartCount = cart.reduce((sum, item) => sum + item.qty, 0);
+  const handleRemoveFromCart = (productId: number, productName: string) => {
+    removeFromCart(productId);
+    addToast(`${productName} removido do carrinho`, 'info');
+  };
 
   const handleCheckout = () => {
     if (cart.length === 0) {
@@ -221,6 +202,19 @@ export default function Home() {
         return '';
     }
   };
+
+  if (!isLoaded) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin mb-4">
+            <ShoppingCart size={48} className="text-blue-700 mx-auto" />
+          </div>
+          <p className="text-gray-600">Carregando...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-white overflow-hidden">
@@ -429,7 +423,7 @@ export default function Home() {
                   {/* Add to Cart Button */}
                   <Button
                     type="button"
-                    onClick={() => addToCart(product)}
+                    onClick={() => handleAddToCart(product)}
                     className="w-full bg-blue-700 hover:bg-blue-800 text-white font-semibold transition-smooth hover-lift animate-fade-in-up"
                     style={{ animationDelay: `${idx * 80 + 2100}ms` }}
                   >
@@ -503,7 +497,7 @@ export default function Home() {
                             +
                           </button>
                           <button
-                            onClick={() => removeFromCart(item.id, item.name)}
+                            onClick={() => handleRemoveFromCart(item.id, item.name)}
                             className="ml-auto text-gray-400 hover:text-red-500 text-sm transition-smooth hover-scale"
                           >
                             🗑
