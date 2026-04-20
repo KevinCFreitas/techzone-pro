@@ -7,13 +7,15 @@ import { ThemeProvider } from "./contexts/ThemeContext";
 import Home from "./pages/Home";
 import ProductDetail from "./pages/ProductDetail";
 import Checkout from "./pages/Checkout";
+import Wishlist from "./pages/Wishlist";
 
 
 function Router() {
   return (
     <Switch>
       <Route path={""} component={Home} />
-      <Route path={"/product"} component={ProductDetail} />
+      <Route path={"/produto/:id"} component={ProductDetail} />
+      <Route path={"/desejos"} component={Wishlist} />
       <Route path={"/checkout"} component={Checkout} />
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
