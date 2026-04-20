@@ -5,6 +5,7 @@ import { ShoppingCart, Heart, Star, Search, ChevronRight, Zap, Truck, Shield, Cl
 import { useLocation } from 'wouter';
 import Toast, { ToastMessage, ToastType } from '@/components/Toast';
 import { useCart } from '@/hooks/useCart';
+import { useWishlist } from '@/hooks/useWishlist';
 
 interface Product {
   id: number;
@@ -122,6 +123,7 @@ const categories = ['Todos', 'Smartphones', 'Notebooks', 'Áudio', 'Games', 'Wea
 export default function Home() {
   const [, setLocation] = useLocation();
   const { cart, addToCart, removeFromCart, updateQty, cartTotal, cartCount, isLoaded } = useCart();
+  const { isInWishlist, toggleWishlist } = useWishlist();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('Todos');
   const [sortBy, setSortBy] = useState('default');
@@ -164,6 +166,15 @@ export default function Home() {
   const handleRemoveFromCart = (productId: number, productName: string) => {
     removeFromCart(productId);
     addToast(`${productName} removido do carrinho`, 'info');
+  };
+
+  const handleWishlist = (product: Product) => {
+    toggleWishlist(product.id);
+    if (isInWishlist(product.id)) {
+      addToast(`Removido da lista de desejos`, 'info');
+    } else {
+      addToast(`♥ ${product.name} adicionado à lista de desejos!`, 'success');
+    }
   };
 
   const handleCheckout = () => {
@@ -377,7 +388,8 @@ export default function Home() {
                   <img
                     src={product.image}
                     alt={product.name}
-                    className="w-full h-full object-cover group-hover:scale-110 transition-smooth duration-500"
+                    className="w-full h-full object-cover group-hover:scale-110 transition-smooth duration-500 cursor-pointer"
+                    onClick={() => setLocation(`/product?id=${product.id}`)}
                   />
                   {product.badge && (
                     <div
@@ -387,15 +399,36 @@ export default function Home() {
                       {product.badge === 'sale' ? `−${discount}%` : product.badge === 'new' ? 'Novo' : '🔥 Hot'}
                     </div>
                   )}
-                  <button className="absolute top-3 right-3 bg-white rounded-full p-2 shadow-md hover:shadow-lg transition-smooth hover-scale animate-fade-in-right" style={{ animationDelay: `${idx * 80 + 1500}ms` }}>
-                    <Heart size={18} className="text-gray-400 hover:text-red-500 transition-smooth" />
+                  <button
+                    onClick={() => handleWishlist(product)}
+                    className={`absolute top-3 right-3 rounded-full p-2 shadow-md hover:shadow-lg transition-smooth hover-scale animate-fade-in-right ${
+                      isInWishlist(product.id)
+                        ? 'bg-red-50'
+                        : 'bg-white'
+                    }`}
+                    style={{ animationDelay: `${idx * 80 + 1500}ms` }}
+                  >
+                    <Heart
+                      size={18}
+                      className={`transition-smooth ${
+                        isInWishlist(product.id)
+                          ? 'fill-red-500 text-red-500'
+                          : 'text-gray-400 hover:text-red-500'
+                      }`}
+                    />
                   </button>
                 </div>
 
                 {/* Product Info */}
                 <div className="p-4 flex flex-col h-full">
                   <p className="text-xs text-gray-500 mb-2 animate-fade-in-up" style={{ animationDelay: `${idx * 80 + 1600}ms` }}>{product.seller}</p>
-                  <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2 text-sm animate-fade-in-up" style={{ animationDelay: `${idx * 80 + 1700}ms` }}>{product.name}</h3>
+                  <h3
+                    className="font-semibold text-gray-900 mb-2 line-clamp-2 text-sm animate-fade-in-up cursor-pointer hover:text-blue-700 transition-smooth"
+                    onClick={() => setLocation(`/product?id=${product.id}`)}
+                    style={{ animationDelay: `${idx * 80 + 1700}ms` }}
+                  >
+                    {product.name}
+                  </h3>
 
                   {/* Rating */}
                   <div className="mb-3">
@@ -475,7 +508,11 @@ export default function Home() {
                       <img
                         src={item.image}
                         alt={item.name}
-                        className="w-16 h-16 object-cover rounded bg-gray-100 hover-scale transition-smooth"
+                        className="w-16 h-16 object-cover rounded bg-gray-100 hover-scale transition-smooth cursor-pointer"
+                        onClick={() => {
+                          setIsCartOpen(false);
+                          setLocation(`/product?id=${item.id}`);
+                        }}
                       />
                       <div className="flex-1">
                         <p className="font-semibold text-sm text-gray-900">{item.name}</p>
