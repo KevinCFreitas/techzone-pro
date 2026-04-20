@@ -428,6 +428,7 @@ export default function Home() {
 
                   {/* Add to Cart Button */}
                   <Button
+                    type="button"
                     onClick={() => addToCart(product)}
                     className="w-full bg-blue-700 hover:bg-blue-800 text-white font-semibold transition-smooth hover-lift animate-fade-in-up"
                     style={{ animationDelay: `${idx * 80 + 2100}ms` }}
