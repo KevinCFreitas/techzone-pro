@@ -225,6 +225,17 @@
   }
 }
 
+@keyframes fadeOutRight {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+}
+
 @keyframes scaleIn {
   from {
     opacity: 0;
