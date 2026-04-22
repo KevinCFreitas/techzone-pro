@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ChevronLeft, CheckCircle, Lock, CreditCard, Smartphone } from 'lucide-react';
 import { useLocation } from 'wouter';
-import { useCart } from '@/hooks/useCart';
+import { useCart } from '@/contexts/CartContext';
+import { calculateShippingCost, getTotalWeight } from '@/data/shipping';
 
 interface FormErrors {
   [key: string]: string;
@@ -51,7 +52,17 @@ export default function Checkout() {
   });
 
   const subtotal = cartItems.reduce((sum, item) => sum + item.price * item.qty, 0);
-  const shipping = subtotal >= 200 ? 0 : 29.9;
+  
+  // Calcular frete dinamicamente com base no CEP
+  const shippingInfo = useMemo(() => {
+    if (!formData.zipCode) {
+      return { cost: 0, estimatedDays: 0, state: '' };
+    }
+    const result = calculateShippingCost(formData.zipCode, subtotal, getTotalWeight(cartItems));
+    return result || { cost: 0, estimatedDays: 0, state: '' };
+  }, [formData.zipCode, subtotal, cartItems]);
+  
+  const shipping = shippingInfo.cost;
   const total = subtotal + shipping;
 
   const validateShipping = () => {
@@ -298,11 +309,19 @@ export default function Checkout() {
                       <Input
                         type="text"
                         value={formData.zipCode}
-                        onChange={(e) => setFormData({ ...formData, zipCode: e.target.value })}
+                        onChange={(e) => {
+                          const value = e.target.value.replace(/\D/g, '').slice(0, 8);
+                          setFormData({ ...formData, zipCode: value });
+                        }}
                         className={`w-full transition-smooth ${errors.zipCode ? 'border-red-500 focus:ring-red-500' : ''}`}
-                        placeholder="01310-100"
+                        placeholder="01310100"
                       />
                       {errors.zipCode && <p className="text-red-500 text-sm mt-1 animate-fade-in-up">{errors.zipCode}</p>}
+                      {formData.zipCode && shippingInfo.state && (
+                        <p className="text-green-600 text-sm mt-2 animate-fade-in-up">
+                          Entrega em {shippingInfo.state} em ate {shippingInfo.estimatedDays} dia(s)
+                        </p>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -518,10 +537,16 @@ export default function Checkout() {
                 </div>
                 <div className="flex justify-between text-sm text-gray-600">
                   <span>Frete</span>
-                  <span className={shipping === 0 ? 'text-green-600 font-semibold' : ''}>
-                    {shipping === 0 ? 'Grátis' : `R$ ${shipping.toFixed(2).replace('.', ',')}`}
+                  <span className={shipping === 0 ? 'text-green-600 font-semibold' : 'text-gray-900 font-semibold'}>
+                    {shipping === 0 ? 'Gratis' : `R$ ${shipping.toLocaleString('pt-BR')}`}
                   </span>
                 </div>
+                {shippingInfo.estimatedDays > 0 && (
+                  <div className="flex justify-between text-xs text-gray-500">
+                    <span>Prazo estimado</span>
+                    <span>{shippingInfo.estimatedDays} dia(s)</span>
+                  </div>
+                )}
                 {formData.paymentMethod === 'pix' && (
                   <div className="flex justify-between text-sm text-green-600 font-semibold">
                     <span>Desconto PIX (5%)</span>
