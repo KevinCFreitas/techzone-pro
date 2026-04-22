@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Heart, ShoppingCart, Trash2, ChevronLeft, Truck, Search, Star, Info } from 'lucide-react';
+import { Heart, ShoppingCart, Trash2, ChevronLeft, Truck, Search, Star, Info, Loader2 } from 'lucide-react';
 import { useLocation } from 'wouter';
 import { products } from '@/data/products';
 import { useWishlist } from '@/hooks/useWishlist';
@@ -14,6 +14,7 @@ export default function Wishlist() {
   const { wishlist, removeFromWishlist } = useWishlist();
   const { addToCart } = useCart();
   const [zipCode, setZipCode] = useState('');
+  const [isLoadingCep, setIsLoadingCep] = useState(false);
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
 
   const wishlistProducts = useMemo(() => 
@@ -171,10 +172,21 @@ export default function Wishlist() {
                       type="text" 
                       placeholder="Digite seu CEP (ex: 01310100)" 
                       value={zipCode}
-                      onChange={(e) => setZipCode(e.target.value.replace(/\D/g, '').slice(0, 8))}
+                      onChange={(e) => {
+                        const val = e.target.value.replace(/\D/g, '').slice(0, 8);
+                        setZipCode(val);
+                        if (val.length === 8) {
+                          setIsLoadingCep(true);
+                          setTimeout(() => setIsLoadingCep(false), 600);
+                        }
+                      }}
                       className="pr-10 h-12 rounded-xl border-gray-200 focus:ring-blue-500 transition-smooth"
                     />
-                    <Search size={18} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                    {isLoadingCep ? (
+                      <Loader2 size={18} className="absolute right-3 top-1/2 -translate-y-1/2 text-blue-700 animate-spin" />
+                    ) : (
+                      <Search size={18} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                    )}
                   </div>
                   
                   {shippingInfo ? (

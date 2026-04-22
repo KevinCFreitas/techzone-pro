@@ -1,7 +1,7 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { ChevronLeft, CheckCircle, Lock, CreditCard, Smartphone } from 'lucide-react';
+import { ChevronLeft, CheckCircle, Lock, CreditCard, Smartphone, Loader2 } from 'lucide-react';
 import { useLocation } from 'wouter';
 import { useCart } from '@/contexts/CartContext';
 import { calculateShippingCost, getTotalWeight } from '@/data/shipping';
@@ -32,6 +32,7 @@ export default function Checkout() {
   const { cart: cartItems, clearCart } = useCart();
   const [step, setStep] = useState<'shipping' | 'payment' | 'confirmation'>('shipping');
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isLoadingCep, setIsLoadingCep] = useState(false);
   const [errors, setErrors] = useState<FormErrors>({});
 
   const [formData, setFormData] = useState<CheckoutData>({
@@ -64,6 +65,35 @@ export default function Checkout() {
   
   const shipping = shippingInfo.cost;
   const total = subtotal + shipping;
+
+  const fetchAddress = async (cep: string) => {
+    setIsLoadingCep(true);
+    try {
+      const response = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+      const data = await response.json();
+      
+      if (!data.erro) {
+        setFormData(prev => ({
+          ...prev,
+          address: data.logradouro || prev.address,
+          city: data.localidade || prev.city,
+          state: data.uf || prev.state,
+          complement: data.complemento || prev.complement,
+        }));
+        setErrors(prev => {
+          const newErrors = { ...prev };
+          delete newErrors.zipCode;
+          return newErrors;
+        });
+      } else {
+        setErrors(prev => ({ ...prev, zipCode: 'CEP não encontrado' }));
+      }
+    } catch (error) {
+      console.error('Erro ao buscar CEP:', error);
+    } finally {
+      setIsLoadingCep(false);
+    }
+  };
 
   const validateShipping = () => {
     const newErrors: FormErrors = {};
@@ -306,20 +336,28 @@ export default function Checkout() {
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">CEP</label>
-                      <Input
-                        type="text"
-                        value={formData.zipCode}
-                        onChange={(e) => {
-                          const value = e.target.value.replace(/\D/g, '').slice(0, 8);
-                          setFormData({ ...formData, zipCode: value });
-                        }}
-                        className={`w-full transition-smooth ${errors.zipCode ? 'border-red-500 focus:ring-red-500' : ''}`}
-                        placeholder="01310100"
-                      />
+                      <div className="relative">
+                        <Input
+                          type="text"
+                          value={formData.zipCode}
+                          onChange={(e) => {
+                            const value = e.target.value.replace(/\D/g, '').slice(0, 8);
+                            setFormData({ ...formData, zipCode: value });
+                            if (value.length === 8) {
+                              fetchAddress(value);
+                            }
+                          }}
+                          className={`w-full transition-smooth ${errors.zipCode ? 'border-red-500 focus:ring-red-500' : ''}`}
+                          placeholder="01310100"
+                        />
+                        {isLoadingCep && (
+                          <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 animate-spin text-blue-700" size={18} />
+                        )}
+                      </div>
                       {errors.zipCode && <p className="text-red-500 text-sm mt-1 animate-fade-in-up">{errors.zipCode}</p>}
-                      {formData.zipCode && shippingInfo.state && (
-                        <p className="text-green-600 text-sm mt-2 animate-fade-in-up">
-                          Entrega em {shippingInfo.state} em ate {shippingInfo.estimatedDays} dia(s)
+                      {formData.zipCode.length === 8 && shippingInfo.state && (
+                        <p className="text-green-600 text-sm mt-2 animate-fade-in-up font-medium">
+                          ✓ Entrega para {shippingInfo.state} em ate {shippingInfo.estimatedDays} dia(s)
                         </p>
                       )}
                     </div>
