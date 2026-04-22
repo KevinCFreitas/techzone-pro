@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { ChevronLeft, Heart, Star, ShoppingCart, Truck, Shield, RotateCcw } from 'lucide-react';
 import { useLocation, useRoute } from 'wouter';
-import { useCart } from '@/hooks/useCart';
+import { useCart } from '@/contexts/CartContext';
 import { useWishlist } from '@/hooks/useWishlist';
 import Toast, { ToastMessage, ToastType } from '@/components/Toast';
 import { getProductById } from '@/data/products';

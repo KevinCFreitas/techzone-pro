@@ -3,7 +3,7 @@ import { Heart, ShoppingCart, Trash2 } from 'lucide-react';
 import { useLocation } from 'wouter';
 import { products } from '@/data/products';
 import { useWishlist } from '@/hooks/useWishlist';
-import { useCart } from '@/hooks/useCart';
+import { useCart } from '@/contexts/CartContext';
 
 export default function Wishlist() {
   const [, setLocation] = useLocation();

@@ -4,7 +4,7 @@ import { Input } from '@/components/ui/input';
 import { ShoppingCart, Heart, Star, Search, ChevronRight, Zap, Truck, Shield, Clock } from 'lucide-react';
 import { useLocation } from 'wouter';
 import Toast, { ToastMessage, ToastType } from '@/components/Toast';
-import { useCart } from '@/hooks/useCart';
+import { useCart } from '@/contexts/CartContext';
 import { useWishlist } from '@/hooks/useWishlist';
 
 import { products, type Product } from '@/data/products';
@@ -339,18 +339,18 @@ export default function Home() {
                   </div>
 
                   {/* Price */}
-                  <div className="mb-4 mt-auto">
-                    <div className="flex items-baseline gap-2 animate-fade-in-up" style={{ animationDelay: `${idx * 80 + 1900}ms` }}>
-                      <span className="text-2xl font-bold text-blue-700 animate-glow-pulse">
+                  <div className="mb-4 mt-2">
+                    <div className="flex items-baseline gap-2">
+                      <span className="text-xl font-bold text-blue-700">
                         R$ {product.price.toLocaleString('pt-BR')}
                       </span>
                       {product.oldPrice && (
-                        <span className="text-sm text-gray-500 line-through">
+                        <span className="text-xs text-gray-500 line-through">
                           R$ {product.oldPrice.toLocaleString('pt-BR')}
                         </span>
                       )}
                     </div>
-                    <p className="text-xs text-gray-600 mt-1 animate-fade-in-up" style={{ animationDelay: `${idx * 80 + 2000}ms` }}>
+                    <p className="text-[10px] text-gray-600 mt-0.5">
                       ou 12x R$ {(product.price / 12).toFixed(2).replace('.', ',')} sem juros
                     </p>
                   </div>
