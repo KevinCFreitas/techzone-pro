@@ -45,7 +45,7 @@ const getStyles = (type: ToastType) => {
 
 export default function Toast({ toasts, onRemove }: ToastProps) {
   return (
-    <div className="fixed top-24 right-6 z-[60] space-y-3 pointer-events-none">
+    <div className="fixed top-6 left-1/2 -translate-x-1/2 z-[100] space-y-3 pointer-events-none w-full max-w-md px-4">
       {toasts.map((toast) => (
         <ToastItem
           key={toast.id}
@@ -86,7 +86,7 @@ function ToastItem({ toast, onRemove, icon, styles }: ToastItemProps) {
         shadow-lg hover-lift transition-smooth
       `}
       style={{
-        animation: isExiting ? 'fadeOutRight 0.3s ease-out forwards' : 'fadeInRight 0.4s ease-out forwards',
+        animation: isExiting ? 'fadeOutUp 0.3s ease-out forwards' : 'fadeInDown 0.4s ease-out forwards',
       }}
     >
       <div className="flex-shrink-0 animate-bounce-in">{icon}</div>

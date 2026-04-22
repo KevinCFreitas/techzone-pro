@@ -515,26 +515,46 @@ export default function Checkout() {
 
             {/* Confirmation Step */}
             {step === 'confirmation' && (
-              <div className="bg-white rounded-lg shadow-md p-8 text-center animate-fade-in-up" style={{ animationDelay: '200ms' }}>
-                <div className="mb-6 animate-bounce-in">
-                  <CheckCircle size={64} className="mx-auto text-green-500 animate-pulse-glow" />
+              <div className="bg-white rounded-lg shadow-md p-8 animate-fade-in-up" style={{ animationDelay: '200ms' }}>
+                <div className="text-center mb-8">
+                  <div className="mb-6 animate-bounce-in">
+                    <CheckCircle size={64} className="mx-auto text-green-500 animate-pulse-glow" />
+                  </div>
+                  <h2 className="text-3xl font-bold text-gray-900 mb-2 animate-fade-in-up" style={{ animationDelay: '300ms' }}>
+                    Pedido Confirmado!
+                  </h2>
+                  <p className="text-gray-600 animate-fade-in-up" style={{ animationDelay: '400ms' }}>
+                    Seu pedido foi recebido com sucesso. Você receberá um email de confirmação em breve.
+                  </p>
                 </div>
-                <h2 className="text-3xl font-bold text-gray-900 mb-2 animate-fade-in-up" style={{ animationDelay: '300ms' }}>
-                  Pedido Confirmado!
-                </h2>
-                <p className="text-gray-600 mb-8 animate-fade-in-up" style={{ animationDelay: '400ms' }}>
-                  Seu pedido foi recebido com sucesso. Você receberá um email de confirmação em breve.
-                </p>
 
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-8 text-left animate-fade-in-up" style={{ animationDelay: '500ms' }}>
-                  <p className="text-sm text-gray-600 mb-2">Número do Pedido</p>
-                  <p className="text-2xl font-bold text-blue-700 animate-glow-pulse">#TZ{Math.random().toString(36).substr(2, 9).toUpperCase()}</p>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                  <div className="bg-blue-50 border border-blue-200 rounded-xl p-6 text-left animate-fade-in-left" style={{ animationDelay: '500ms' }}>
+                    <p className="text-sm text-gray-600 mb-2 font-bold uppercase tracking-wider">Número do Pedido</p>
+                    <p className="text-2xl font-bold text-blue-700 animate-glow-pulse">#TZ{Math.random().toString(36).substr(2, 9).toUpperCase()}</p>
+                  </div>
+                  
+                  <div className="bg-gray-50 border border-gray-200 rounded-xl p-6 text-left animate-fade-in-right" style={{ animationDelay: '600ms' }}>
+                    <p className="text-sm text-gray-600 mb-2 font-bold uppercase tracking-wider">Entrega em</p>
+                    <p className="text-sm text-gray-900 font-semibold">{formData.fullName}</p>
+                    <p className="text-xs text-gray-600">{formData.address}, {formData.addressNumber}</p>
+                    <p className="text-xs text-gray-600">{formData.city} - {formData.state}, {formData.zipCode}</p>
+                  </div>
+                </div>
+
+                <div className="bg-green-50 border border-green-100 rounded-xl p-4 mb-8 flex items-center gap-3 animate-fade-in-up" style={{ animationDelay: '700ms' }}>
+                  <div className="bg-green-500 text-white p-1 rounded-full">
+                    <CheckCircle size={16} />
+                  </div>
+                  <p className="text-sm text-green-800 font-medium">
+                    Pagamento via {formData.paymentMethod.toUpperCase()} processado com sucesso!
+                  </p>
                 </div>
 
                 <Button
                   onClick={handleBackToHome}
-                  className="w-full bg-blue-700 hover:bg-blue-800 text-white font-semibold py-3 transition-smooth hover-lift animate-fade-in-up"
-                  style={{ animationDelay: '600ms' }}
+                  className="w-full bg-blue-700 hover:bg-blue-800 text-white font-semibold py-4 rounded-xl transition-smooth hover-lift animate-fade-in-up"
+                  style={{ animationDelay: '800ms' }}
                 >
                   Voltar para a Loja
                 </Button>
